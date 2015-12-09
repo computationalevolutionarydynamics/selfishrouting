@@ -93,6 +93,7 @@ class MoranProcess:
         # replace, maybe mutation
 
 test = MoranProcess(2,10,1,2,3,4,5)
+
 test.step()
 
 
