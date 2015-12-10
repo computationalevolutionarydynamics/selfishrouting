@@ -21,11 +21,13 @@ class MoranProcess:
         self.number_of_strategies = number_of_strategies
         self.population_size = population_size
         self.population = np.array([])
+        self.generate_population()
         self.a = a
         self.b = b
         self.c = c
         self.d = d
         self.w = w
+
 
     def generate_population(self):  # generates a random population
 
@@ -53,41 +55,27 @@ class MoranProcess:
         temp_a2 = (self.number_of_players_type_2 * self.b) / (self.population_size - 1)
         payoff_of_a = temp_a1 + temp_a2
 
-        temp_b1 = ((self.number_of_players_type_1) * self.c) / (self.population_size - 1)
+        temp_b1 = (self.number_of_players_type_1 * self.c) / (self.population_size - 1)
         temp_b2 = ((self.number_of_players_type_2 - 1) * self.d) / (self.population_size - 1)
         payoff_of_b = temp_b1 + temp_b2
 
-        l1 = [payoff_of_a, payoff_of_b]
-        return l1
+        return payoff_of_a, payoff_of_b
 
     def __compute_fitness(self):
         # calculate transition from payoff to fitness
-        payoff = self.__compute_payoff()
-        temp_factor = self.w * payoff
-        transition_factors_for_one = np.exp(temp_factor[1])
-        transition_factors_for_two = np.exp(temp_factor[2])
+        payoff_a, payoff_b = self.__compute_payoff()
+        transition_factors_for_one = np.exp(self.w*payoff_a)
+        transition_factors_for_two = np.exp(self.w*payoff_b)
         fitness_of_one = (self.number_of_players_type_1 * transition_factors_for_one) / (
         (self.number_of_players_type_1 * transition_factors_for_one) + (
-        self.number_of_players_type_2 * transition_factors_for_two))
+         self.number_of_players_type_2 * transition_factors_for_two))
         fitness_of_two = (self.number_of_players_type_1 * transition_factors_for_two) / (
         (self.number_of_players_type_1 * transition_factors_for_one) + (
-        self.number_of_players_type_2 * transition_factors_for_two))
-        l1 = [fitness_of_one, fitness_of_two]
-        return l1
-
-    def __to_reproduce(self):
-        fitness = self.__compute_fitness()
-        if fitness[0] > fitness[1]:
-            reproduce = 1
-        elif fitness[0] < fitness[1]:
-            reproduce = 2
-        else:
-            reproduce = np.random.randint(1, 3, 1)
-
-        return reproduce
+         self.number_of_players_type_2 * transition_factors_for_two))
+        return fitness_of_one, fitness_of_two
 
     def __replace(self):
-        to_add = self.__to_reproduce()
+        to_add = np.random.choice([1, 2], p= self.__compute_fitness())
         self.population = np.append(self.population, to_add)
 
     def __to_die_and_replace(self):
@@ -96,7 +84,7 @@ class MoranProcess:
         self.population = np.delete(self.population, num_to_die)
 
     def __mutate(self):
-        return
+        pass
 
     def step(self):
 
@@ -127,9 +115,3 @@ class MoranProcess:
 
         # replace, maybe mutation
 
-
-test = MoranProcess(2, 10, 1, 2, 3, 4, 5)
-test.generate_population()
-
-for i in range(1, 10):
-    test.step()
