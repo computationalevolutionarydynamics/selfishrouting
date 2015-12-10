@@ -3,7 +3,7 @@ import numpy as np
 
 class MoranProcess:
     def __init__(self, number_of_strategies, population_size, a, b, c, d,
-                 w):  # removed initial_population add intensity of selection
+                 w, mutation_probability):  # removed initial_population add intensity of selection
 
         """
         This function initialises different instance variables.
@@ -14,6 +14,7 @@ class MoranProcess:
         :param c: c from the payoff matrix (a, b; c, d)
         :param d: d from the payoff matrix (a, b; c, d)
         :param w: intensity of selection
+        :param mutation_probability: mutation probability
         :return:
         """
 
@@ -27,10 +28,9 @@ class MoranProcess:
         self.c = c
         self.d = d
         self.w = w
-
+        self.mutation_probability = mutation_probability
 
     def generate_population(self):  # generates a random population
-
         """
         This function generates an array for different values. Array length is equal to the population size specified
          in the init function. Differnt types of values in the array is equal to the number of stategies.
@@ -74,8 +74,12 @@ class MoranProcess:
          self.number_of_players_type_2 * transition_factors_for_two))
         return fitness_of_one, fitness_of_two
 
-    def __replace(self):
-        to_add = np.random.choice([1, 2], p= self.__compute_fitness())
+    def __reproduce(self):
+        p_a, p_b = self.__compute_fitness()
+        # we recalculate the probabilities now with mutation.
+        p_a_with_mutation = (1.0-self.mutation_probability)*p_a + self.mutation_probability*(1.0-p_a)
+        p_b_with_mutation = (1.0-self.mutation_probability)*p_b + self.mutation_probability*(1.0-p_b)
+        to_add = np.random.choice([1, 2], p=(p_a_with_mutation, p_b_with_mutation))
         self.population = np.append(self.population, to_add)
 
     def __to_die_and_replace(self):
@@ -83,8 +87,6 @@ class MoranProcess:
                                        1)  # generates a random number with equal probablity
         self.population = np.delete(self.population, num_to_die)
 
-    def __mutate(self):
-        pass
 
     def step(self):
 
@@ -108,7 +110,7 @@ class MoranProcess:
         # print("\n")
 
         # select randomly an individual to reproduce (fitness proportional)
-        self.__replace()
+        self.__reproduce()
         print("Individual reproduced based upon the fitness function")
         print(self.population)
         print("\n")
