@@ -10,11 +10,11 @@ class MoranProcess:
         This function initialises different instance variables.
         :param number_of_strategies:
         :param population_size:
-        :param a:
-        :param b:
-        :param c:
-        :param d:
-        :param w:
+        :param a: a from the payoff matrix (a, b; c, d)
+        :param b: b from the payoff matrix (a, b; c, d)
+        :param c: c from the payoff matrix (a, b; c, d)
+        :param d: d from the payoff matrix (a, b; c, d)
+        :param w: intensity of selection
         :return:
         """
 
@@ -42,21 +42,19 @@ class MoranProcess:
             i += 1
 
     def __compute_payoff(self):
-        # calculate number of differnt types in population
-        self.sum_of_ones = 0
-        self.sum_of_tows = 0
-        for i in range(len(self.population)):
-            if self.population[i] == 1:
-                self.sum_of_ones += 1
-            else:
-                self.sum_of_tows += 1
+        """
+        We need some more detailed comments here... mayvbe...
+        :return:
+        """
+        self.number_of_players_type_1 = len(np.where(self.population == 1))
+        self.number_of_players_type_2 = len(np.where(self.population == 2))
 
-        temp_a1 = ((self.sum_of_ones - 1 ) * self.a) / (self.population_size - 1)
-        temp_a2 = ((self.sum_of_tows ) * self.b) / (self.population_size - 1)
+        temp_a1 = ((self.number_of_players_type_1 - 1) * self.a) / (self.population_size - 1)
+        temp_a2 = ((self.number_of_players_type_2) * self.b) / (self.population_size - 1)
         payoff_of_a = temp_a1 + temp_a2
 
-        temp_b1 = ((self.sum_of_ones) * self.c) / (self.population_size - 1)
-        temp_b2 = ((self.sum_of_tows - 1) * self.d ) / (self.population_size - 1)
+        temp_b1 = ((self.number_of_players_type_1) * self.c) / (self.population_size - 1)
+        temp_b2 = ((self.number_of_players_type_2 - 1) * self.d) / (self.population_size - 1)
         payoff_of_b = temp_b1 + temp_b2
 
         l1 = [payoff_of_a, payoff_of_b]
@@ -69,8 +67,8 @@ class MoranProcess:
         temp_factor = self.w * payoff
         transition_factors_for_one = np.exp(temp_factor[1])
         transition_factors_for_two = np.exp(temp_factor[2])
-        fitness_of_one = (self.sum_of_ones * transition_factors_for_one) / ((self.sum_of_ones * transition_factors_for_one) + (self.sum_of_tows * transition_factors_for_two))
-        fitness_of_two = (self.sum_of_ones * transition_factors_for_two) / ((self.sum_of_ones * transition_factors_for_one) + (self.sum_of_tows * transition_factors_for_two))
+        fitness_of_one = (self.number_of_players_type_1 * transition_factors_for_one) / ((self.number_of_players_type_1 * transition_factors_for_one) + (self.number_of_players_type_2 * transition_factors_for_two))
+        fitness_of_two = (self.number_of_players_type_1 * transition_factors_for_two) / ((self.number_of_players_type_1 * transition_factors_for_one) + (self.number_of_players_type_2 * transition_factors_for_two))
         l1 = [fitness_of_one, fitness_of_two]
         return l1
 
