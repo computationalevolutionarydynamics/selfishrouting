@@ -2,68 +2,48 @@ import numpy as np
 
 
 class MoranProcess:
-    def __init__(self, a, b, c, d,
-                 w, mutation_probability, population_array):  # removed initial_population add intensity of selection
+    def __init__(self, game_matrix, w, mutation_probability, population_array):  # removed initial_population add intensity of selection
 
         """
         This function initialises different instance variables.
         :param number_of_strategies:
-        :param a: a from the payoff matrix (a, b; c, d)
-        :param b: b from the payoff matrix (a, b; c, d)
-        :param c: c from the payoff matrix (a, b; c, d)
-        :param d: d from the payoff matrix (a, b; c, d)
+        :param game_matrix: ?????
         :param w: intensity of selection
         :param mutation_probability: mutation probability
         :param population_array: put some description here....
         :return:
         """
         # temporarily we only accept populations of two types
-        assert len(population_array) == 2, "This works for two types only!"
-        self.number_of_strategies = 2
+        assert game_matrix.shape[0] == game_matrix.shape[1], "Matrix should be square"
+        self.game_matrix = game_matrix
+        self.number_of_strategies = game_matrix.shape[0]
+        assert len(population_array) == self.number_of_strategies, "Number of strategies does not agree with population array"
         self.population = np.array(population_array, dtype=int)
         self.population_size = np.sum(self.population)
         assert self.population_size >= 2, "Population should be larger than 1"
-        self.a = a
-        self.b = b
-        self.c = c
-        self.d = d
+        assert w>=0, "Intensity of selection should be 0 or positive"
         self.w = w
         assert 0 <= mutation_probability <=1, "Mutation probability should be in [0, 1]"
         self.mutation_probability = mutation_probability
-
 
     def __compute_payoff(self):
         """
         We need some more detailed comments here... maybe...
         :return:
         """
-
-        temp_a1 = ((self.population[0] - 1) * self.a) / (self.population_size - 1)
-        temp_a2 = (self.population[1] * self.b) / (self.population_size - 1)
-        payoff_of_a = temp_a1 + temp_a2
-
-        temp_b1 = (self.population[0] * self.c) / (self.population_size - 1)
-        temp_b2 = ((self.population[1] - 1) * self.d) / (self.population_size - 1)
-        payoff_of_b = temp_b1 + temp_b2
-
-        return payoff_of_a, payoff_of_b
+        return (np.dot(self.game_matrix, self.population)-np.diag(self.game_matrix))/ (self.population_size-1)
 
     def __compute_fitness(self):
         # calculate transition from payoff to fitness
-        payoff_a, payoff_b = self.__compute_payoff()
-        transition_factors_for_one = np.exp(self.w*payoff_a)
-        transition_factors_for_two = np.exp(self.w*payoff_b)
-        fitness_of_one = (self.population[0] * transition_factors_for_one) / (
-         (self.population[0] * transition_factors_for_one) + (
-          self.population[1] * transition_factors_for_two))
-        fitness_of_two = (self.population[1] * transition_factors_for_two) / (
-         (self.population[0] * transition_factors_for_one) + (
-           self.population[1] * transition_factors_for_two))
-        return fitness_of_one, fitness_of_two
+        payoff_vector = self.__compute_payoff()
+        probabilities = self.population*np.exp(self.w*payoff_vector)
+        return probabilities/np.sum(probabilities)
+
 
     def __reproduce(self):
-        p_a, p_b = self.__compute_fitness()
+        probabilities = self.__compute_fitness()
         # we recalculate the probabilities now with mutation.
+        #TODO: Linear algrebra version of this and continue...
         p_a_with_mutation = (1.0-self.mutation_probability)*p_a + self.mutation_probability*(1.0-p_a)
         p_b_with_mutation = (1.0-self.mutation_probability)*p_b + self.mutation_probability*(1.0-p_b)
         to_add = np.random.choice(range(self.number_of_strategies), p=(p_a_with_mutation, p_b_with_mutation))
