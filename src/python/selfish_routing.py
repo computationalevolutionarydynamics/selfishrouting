@@ -15,9 +15,11 @@ class MoranProcess:
         :return:
         """
         # temporarily we only accept populations of two types
-        assert game_matrix.shape[0] == game_matrix.shape[1], "Matrix should be square"
-        self.game_matrix = game_matrix
-        self.number_of_strategies = game_matrix.shape[0]
+
+        self.game_matrix = np.array(game_matrix)
+        assert self.game_matrix.shape[0] == self.game_matrix.shape[1], "Matrix should be square"
+
+        self.number_of_strategies = self.game_matrix.shape[0]
         assert len(
             population_array) == self.number_of_strategies, "Number of strategies does not agree with population array"
         self.population = np.array(population_array, dtype=int)
@@ -43,12 +45,11 @@ class MoranProcess:
 
     def __reproduce(self):
         # we recalculate the probabilities now with mutation.
-        v = np.array([self.__compute_fitness()])
-        v1 = v
-        v = self.mutation_probability * ((2 * v) - 1)
-        v = v1 - v
-        to_add = np.random.choice(range(self.number_of_strategies), p=v)
-        self.population[to_add] += 1
+        reproduction_probabilities = np.array(self.__compute_fitness())
+        reproduction_probabilities -= (
+                                          2 * reproduction_probabilities - 1) * self.mutation_probability
+        reproduce = np.random.choice(range(self.number_of_strategies), p=reproduction_probabilities)
+        self.population[reproduce] += 1
 
     def __to_die_and_replace(self):
         num_to_die = np.random.randint(0, self.number_of_strategies)  # generates a random number with equal probability
@@ -73,7 +74,7 @@ class MoranProcess:
 
 
 def main():
-    test = MoranProcess(game_matrix=[[1, 2], [3, 4]], w=5, mutation_probability=0.01, population_array=[5, 7])
+    test = MoranProcess([[1, 2], [3, 4]], w=5, mutation_probability=0.01, population_array=[5, 7])
     for i in range(1, 10):
         test.step()
 
