@@ -73,7 +73,7 @@ class MoranProcess:
 
 
 def main():
-    test = MoranProcess(game_matrix=[{1, 2}, {3, 4}], w=5, mutation_probability=0.01, population_array=[5, 7])
+    test = MoranProcess(game_matrix=[[1, 2], [3, 4]], w=5, mutation_probability=0.01, population_array=[5, 7])
     for i in range(1, 10):
         test.step()
 
