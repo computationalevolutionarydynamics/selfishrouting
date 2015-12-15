@@ -4,7 +4,7 @@ import pandas as pd
 
 class MoranProcess:
     def __init__(self, game_matrix, w, mutation_probability,
-                 population_array, time_step):  # removed initial_population add intensity of selection
+                 population_array):  # removed initial_population add intensity of selection
 
         """
         This function initialises different instance variables.
@@ -32,12 +32,7 @@ class MoranProcess:
         assert 0 <= mutation_probability <= 1, "Mutation probability should be in [0, 1]"
         self.mutation_probability = mutation_probability
 
-        assert time_step >= 1, "Time Step should be greater or equal to 1"
-        self.time_step = time_step
-        self.time_index = 0
 
-        self.array_of_population = [list(self.population)]
-        self.array_of_time_steps = [0]
 
     def __compute_payoff(self):
         """
@@ -52,49 +47,40 @@ class MoranProcess:
         probabilities = self.population * np.exp(self.w * payoff_vector)
         return probabilities / np.sum(probabilities)
 
-    def __reproduce(self):
-        # we recalculate the probabilities now with mutation.
-        reproduction_probabilities = np.array(self.__compute_fitness())
-        reproduction_probabilities -= (
-                                          2 * reproduction_probabilities - 1) * self.mutation_probability
-        reproduce = np.random.choice(range(self.number_of_strategies), p=reproduction_probabilities)
-        self.population[reproduce] += 1
-
-    def __to_die_and_replace(self):
-        num_to_die = np.random.randint(0, self.number_of_strategies)  # generates a random number with equal probability
-        self.population[num_to_die] -= 1
-
     def step(self):
+        try:
+            # we recalculate the probabilities now with mutation.
+            reproduction_probabilities = np.array(self.__compute_fitness())
+            reproduction_probabilities -= (
+                                          2.0 * reproduction_probabilities - 1.0) * self.mutation_probability
+            reproduce = np.random.choice(range(self.number_of_strategies), p=reproduction_probabilities)
+            die = np.random.choice(range(self.number_of_strategies), p=self.population/self.population_size)
+            self.population[reproduce] += 1
+            self.population[die] -= 1
+        except ValueError:
+            raise Exception("Exception with probabilities {}".format(reproduction_probabilities))
 
-        # select randomly an individual to die
-        self.__to_die_and_replace()
+    def run_time_series(self, number_of_steps, print_every_time_steps=1):
+        assert print_every_time_steps >= 1, "Time Step should be greater or equal to 1"
+        assert number_of_steps >=1, "Number of steps needs to be larger than 0"
+        time_step = 0
+        array_of_population = [list(self.population)]
+        array_of_time_steps = [0]
+        for time_step in range(1, number_of_steps+1):
+            self.step()
+            if time_step%print_every_time_steps == 0:
+                array_of_population.append(list(self.population))
+                array_of_time_steps.append(time_step)
+        df = pd.DataFrame(data=list(zip(array_of_time_steps, array_of_population)), columns=['TimeStep',['A', 'B']])
+        df.set_index('TimeStep')
+        return df
 
-        # select randomly an individual to reproduce (fitness proportional)
-        self.__reproduce()
-
-        #print(self.population)
-        self.time_index += 1
-        if self.time_index == self.time_step:
-            # put the polpulation in array after the time steps specified by time_step parameter
-            self.array_of_population.append(list(self.population))
-            self.array_of_time_steps.append(self.array_of_time_steps[len(self.array_of_time_steps)-1] + self.time_step)
-            self.time_index=0
-
-    def print_table_and_save_to_file(self):
-        # prepare data
-        table = pd.DataFrame(data=list(zip(self.array_of_time_steps,self.array_of_population)), columns=['TimeStep',['A', 'B']])
-        print(table)
-        table.to_csv('data.csv',index=False,header=False)
-
-
-def main():
-    test = MoranProcess([[3, 0], [4, 1]], w=5, mutation_probability=0.001, population_array=[60, 40], time_step=5)
-
-    for i in range(1, 100):
-        test.step()
-
-    test.print_table()
-
-
-if __name__ == "__main__":
-    main()
+#
+# def main():
+#     test = MoranProcess([[3, 0], [4, 1]], w=5, mutation_probability=0.001, population_array=[60, 40])
+#     df = test.run_time_series(1000, 10)
+#     print(df.head())
+#
+#
+# if __name__ == "__main__":
+#     main()
