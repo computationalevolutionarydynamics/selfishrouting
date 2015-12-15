@@ -1,17 +1,18 @@
 import numpy as np
+import pandas as pd
 
 
 class MoranProcess:
     def __init__(self, game_matrix, w, mutation_probability,
-                 population_array):  # removed initial_population add intensity of selection
+                 population_array, time_step):  # removed initial_population add intensity of selection
 
         """
         This function initialises different instance variables.
-        :param number_of_strategies:
         :param game_matrix: ?????
         :param w: intensity of selection
         :param mutation_probability: mutation probability
         :param population_array: put some description here....
+        :param time_step: ??
         :return:
         """
         # temporarily we only accept populations of two types
@@ -22,6 +23,7 @@ class MoranProcess:
         self.number_of_strategies = self.game_matrix.shape[0]
         assert len(
             population_array) == self.number_of_strategies, "Number of strategies does not agree with population array"
+
         self.population = np.array(population_array, dtype=int)
         self.population_size = np.sum(self.population)
         assert self.population_size >= 2, "Population should be larger than 1"
@@ -29,6 +31,13 @@ class MoranProcess:
         self.w = w
         assert 0 <= mutation_probability <= 1, "Mutation probability should be in [0, 1]"
         self.mutation_probability = mutation_probability
+
+        assert time_step >= 1, "Time Step should be greater or equal to 1"
+        self.time_step = time_step
+        self.time_index = 0
+
+        self.array_of_population = [list(self.population)]
+        self.array_of_time_steps = [0]
 
     def __compute_payoff(self):
         """
@@ -56,27 +65,35 @@ class MoranProcess:
         self.population[num_to_die] -= 1
 
     def step(self):
-        # generate population
-        print("Initial population")
-        print(self.population)
 
         # select randomly an individual to die
-        print("Individual selected and died")
         self.__to_die_and_replace()
-        print("Population after the death")
-        print(self.population)
 
         # select randomly an individual to reproduce (fitness proportional)
         self.__reproduce()
-        print("Individual reproduced based upon the fitness function")
-        print(self.population)
-        print("\n")
+
+        #print(self.population)
+        self.time_index += 1
+        if self.time_index == self.time_step:
+            # put the polpulation in array after the time steps specified by time_step parameter
+            self.array_of_population.append(list(self.population))
+            self.array_of_time_steps.append(self.array_of_time_steps[len(self.array_of_time_steps)-1] + self.time_step)
+            self.time_index=0
+
+    def print_table_and_save_to_file(self):
+        # prepare data
+        table = pd.DataFrame(data=list(zip(self.array_of_time_steps,self.array_of_population)), columns=['TimeStep',['A', 'B']])
+        print(table)
+        table.to_csv('data.csv',index=False,header=False)
 
 
 def main():
-    test = MoranProcess([[1, 2], [3, 4]], w=5, mutation_probability=0.01, population_array=[5, 7])
-    for i in range(1, 10):
+    test = MoranProcess([[3, 0], [4, 1]], w=5, mutation_probability=0.001, population_array=[60, 40], time_step=5)
+
+    for i in range(1, 100):
         test.step()
+
+    test.print_table()
 
 
 if __name__ == "__main__":
