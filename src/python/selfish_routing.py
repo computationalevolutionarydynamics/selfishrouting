@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import string
 
 
 class MoranProcess:
@@ -69,7 +70,8 @@ class MoranProcess:
             if time_step%print_every_time_steps == 0:
                 array_of_population.append(list(self.population))
                 array_of_time_steps.append(time_step)
-        df = pd.DataFrame(data=array_of_population, columns=['A', 'B'], index=array_of_time_steps)
+        columnArray = list(map(chr, range(97, 97+len(self.population))))
+        df = pd.DataFrame(data=array_of_population, columns=columnArray, index=array_of_time_steps)
         df.index.names = ['Time Steps']
         return df
 
