@@ -5,7 +5,7 @@ import string
 
 class MoranProcess:
     def __init__(self, game_matrix, w, mutation_probability,
-                 population_array):  # removed initial_population add intensity of selection
+                 population_array, seed = None):  # removed initial_population add intensity of selection
 
         """
         This function initialises different instance variables.
@@ -13,10 +13,12 @@ class MoranProcess:
         :param w: intensity of selection
         :param mutation_probability: mutation probability
         :param population_array: put some description here....
+        :param seed: put some description here....
         :return:
         """
         # temporarily we only accept populations of two types
-
+        if seed is not None:
+            np.random.seed(seed)
         self.game_matrix = np.array(game_matrix)
         assert self.game_matrix.shape[0] == self.game_matrix.shape[1], "Matrix should be square"
 
@@ -71,13 +73,13 @@ class MoranProcess:
             if time_step%print_every_time_steps == 0:
                 array_of_population.append(list(self.population))
                 array_of_time_steps.append(time_step)
-        columnArray = list(map(chr, range(97, 97+len(self.population))))
-        df = pd.DataFrame(data=array_of_population, columns=columnArray, index=array_of_time_steps)
+        column_array = list(map(chr, range(97, 97+len(self.population))))
+        df = pd.DataFrame(data=array_of_population, columns=column_array, index=array_of_time_steps)
         df.index.names = ['Time Steps']
         return df
 
 def main():
-     test = MoranProcess([[3, 0, 1], [4, 1, 1], [2, 5, 1]], w=5, mutation_probability=0.001, population_array=[60, 30, 10])
+     test = MoranProcess([[3, 0, 1, 2], [4, 1, 1, 7], [2, 5, 1, 9], [2, 3, 1, 2]], w=5, mutation_probability=0.001, population_array=[60, 30, 5, 5], seed = 123)
      df = test.run_time_series(1000, 10)
      df.to_csv("my_simulation.csv")
      print(df.head())
