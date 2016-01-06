@@ -53,6 +53,7 @@ class MoranProcess:
             reproduction_probabilities = np.array(self.__compute_fitness())
             reproduction_probabilities -= (
                                           2.0 * reproduction_probabilities - 1.0) * self.mutation_probability
+            reproduction_probabilities = reproduction_probabilities/ np.sum(reproduction_probabilities)
             reproduce = np.random.choice(range(self.number_of_strategies), p=reproduction_probabilities)
             die = np.random.choice(range(self.number_of_strategies), p=self.population/self.population_size)
             self.population[reproduce] += 1
@@ -76,8 +77,9 @@ class MoranProcess:
         return df
 
 def main():
-     test = MoranProcess([[3, 0], [4, 1]], w=5, mutation_probability=0.001, population_array=[60, 40])
+     test = MoranProcess([[3, 0, 1], [4, 1, 1], [2, 5, 1]], w=5, mutation_probability=0.001, population_array=[60, 30, 10])
      df = test.run_time_series(1000, 10)
+     df.to_csv("my_simulation.csv")
      print(df.head())
 
 
