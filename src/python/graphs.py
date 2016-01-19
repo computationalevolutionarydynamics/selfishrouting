@@ -55,7 +55,7 @@ class test:
         print(node1)
         print(node2)
 
-        #print(self.G.get_edge_data(node1,node2).get("object")(2))
+        print(self.G.get_edge_data(node1,node2).get("object")(2))
 
 
     def test_func(self):
