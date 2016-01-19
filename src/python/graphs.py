@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import itertools as it
 
 
-class test:
+class Graphs:
     def __init__(self):
         self.G = nx.Graph()
         self.strategy_set = []
@@ -62,7 +62,7 @@ class test:
         self.__create_graph()
         self.__enumerate_strategies_and_payoffs(2)
 
-t1 = test()
+t1 = Graphs()
 t1.test_func()
 
 
