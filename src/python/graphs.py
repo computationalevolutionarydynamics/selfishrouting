@@ -11,7 +11,7 @@ class test:
     def linear(self, x):
         return x
 
-    def constant(self):
+    def constant(self,x):
         return 0
 
     def quadratic(self, x):
@@ -36,16 +36,16 @@ class test:
         for i in range(0,len(list_of_strategies)):
             temp_string += str(i)
 
-        player_options = [''.join(i) for i in it.product(temp_string, repeat=number_of_players)]
-        print(player_options)
+        profiles = [''.join(i) for i in it.product(temp_string, repeat=number_of_players)]
+        print(profiles)
 
-        for i in player_options:
+        for i in profiles:
             for j in range(0,len(i)):
                 for k in range(0,len(list_of_strategies[int(i[j])])-1):
                     #print(list_of_strategies[int(i[j])][k])
                     #print(list_of_strategies[int(i[j])][k+1])
                     self.traffic_edge(list_of_strategies[int(i[j])][k], list_of_strategies[int(i[j])][k+1], i)
-            break
+
 
 
 
@@ -54,6 +54,8 @@ class test:
         print(profile)
         print(node1)
         print(node2)
+
+        #print(self.G.get_edge_data(node1,node2).get("object")(2))
 
 
     def test_func(self):
