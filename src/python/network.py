@@ -34,7 +34,7 @@ class Network:
 
         # print(self.profiles)
         # print(self.strategy_set)
-        # print(self.payoff)
+        print(self.payoff)
    # Latency functions
 
     @staticmethod
@@ -63,7 +63,7 @@ class Network:
                 elif profile[position] == profile[j]: #both have same profile
                     traffic += 1
                 else:
-                    if self.search_for_edges(strategy[i], strategy[i+1], self.strategy_set[j]):
+                    if self.search_for_edges(strategy[i], strategy[i+1], self.strategy_set[profile[j]]):
                         traffic += 1
             payoff += self.graph.get_edge_data(strategy[i], strategy[i+1]).get("object")(traffic)
             traffic = 0
@@ -71,13 +71,15 @@ class Network:
         return payoff
 
     def search_for_edges(self, node1, node2, strategy):
-        #print(strategy)
-        #print(node1)
-        #print(node2)
+        # print(strategy)
+        # print(node1)
+        # print(node2)
+        x = False
         if node1 in strategy:
             if node2 == strategy[strategy.index(node1) + 1]:
-                return True
-        return False
+                x = True
+        # print(x)
+        return x
 
 
 
@@ -90,3 +92,6 @@ def create_braess_network():
         my_graph.add_edge("B", "T", object=Network.linear)
         return my_graph
 
+
+# g = create_braess_network()
+# t1 = Network(g,3)
