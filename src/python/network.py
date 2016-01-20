@@ -62,9 +62,10 @@ class Network:
                 elif profile[position] == profile[j]: #both have same profile
                     traffic += 1
                 else:
-                    if self.search_for_edges(strategy[i], strategy[i+1], strategy):
+                    if self.search_for_edges(strategy[i], strategy[i+1], self.strategy_set[j]):
                         traffic += 1
             payoff += self.graph.get_edge_data(strategy[i], strategy[i+1]).get("object")(traffic)
+            traffic = 0
 
         return payoff
 
@@ -88,6 +89,3 @@ def create_braess_network():
         my_graph.add_edge("B", "T", object=Network.linear)
         return my_graph
 
-
-
-t1 = Network(create_braess_network(), 2)
