@@ -1,5 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import itertools as it
 
 
@@ -24,10 +23,18 @@ class Network:
         # where keys are profiles (tuples of int), and values
         # are payoffs
 
+        payoff = []
+        self.profiles_with_payoffs = {}
+        for i in self.profiles:
+            for j in range(0,len(i)):
+                payoff.append(self.traffic_edge(self.graph, self.strategy_set[int(i[j])], i, j))
+            self.profiles_with_payoffs[i] = payoff[:]
+            payoff.clear()
 
-
-
-    # Latency functions
+        print(self.profiles)
+        print(self.strategy_set)
+        print(self.profiles_with_payoffs)
+   # Latency functions
 
     @staticmethod
     def linear(x):
@@ -43,11 +50,33 @@ class Network:
 
     # End of latency functions
 
-    def traffic_edge(self, node1, node2, profile = []):
-        print(profile)
-        print(node1)
-        print(node2)
-        print(self.graph.get_edge_data(node1, node2).get("object")(2))
+    def traffic_edge(self, graph, strategy, profile, position):
+
+        traffic = 0
+        payoff = 0
+        for i in range(0, len(strategy)-1):
+            traffic += 1
+            for j in range(0, len(profile)): # position of the index j in profile is the index whose traffic is to be determined
+                if j == position:
+                    pass
+                elif profile[position] == profile[j]: #both have same profile
+                    traffic += 1
+                else:
+                    if self.search_for_edges(strategy[i], strategy[i+1], strategy):
+                        traffic += 1
+            payoff += self.graph.get_edge_data(strategy[i], strategy[i+1]).get("object")(traffic)
+
+        return payoff
+
+    def search_for_edges(self, node1, node2, strategy):
+        #print(strategy)
+        #print(node1)
+        #print(node2)
+        if node1 in strategy:
+            if node2 == strategy[strategy.index(node1) + 1]:
+                return True
+        return False
+
 
 
 def create_braess_network():
@@ -61,3 +90,4 @@ def create_braess_network():
 
 
 
+t1 = Network(create_braess_network(), 2)

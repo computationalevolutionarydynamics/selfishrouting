@@ -101,11 +101,11 @@ class MoranProcess:
 
 
 def main():
-    pass
-    # test = MoranProcess([[3, 0, 1, 2], [4, 1, 1, 7], [2, 5, 1, 9], [2, 3, 1, 2]], w=5, mutation_probability=0.001, population_array=[60, 30, 5, 5], seed = 123)
-    # df = test.run_time_series(1000, 10)
-    # df.to_csv("my_simulation.csv")
-    # print(df.head())
+    #pass
+    test = MoranProcess([[3, 0, 1, 2], [4, 1, 1, 7], [2, 5, 1, 9], [2, 3, 1, 2]], w=5, mutation_probability=0.001, population_array=[60, 30, 5, 5], seed = 123)
+    df = test.run_time_series(1000, 10)
+    df.to_csv("my_simulation.csv")
+    print(df.head())
 
 if __name__ == "__main__":
     main()
