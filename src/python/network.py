@@ -1,5 +1,6 @@
 import networkx as nx
 import itertools as it
+import numpy as np
 
 
 class Network:
@@ -12,7 +13,7 @@ class Network:
         self.strategy_set = []
         for i in nx.all_simple_paths(self.graph, "S", "T"):
             self.strategy_set.append(i)
-
+        self.strategy_set.sort()
         # Then, create all possible profiles corresponding to the set of strategies
         enumeration = []
         for i, strategy in enumerate(self.strategy_set):
@@ -23,17 +24,17 @@ class Network:
         # where keys are profiles (tuples of int), and values
         # are payoffs
 
-        payoff = []
-        self.profiles_with_payoffs = {}
+        payoff_temp = []
+        self.payoff = {}
         for i in self.profiles:
             for j in range(0,len(i)):
-                payoff.append(self.traffic_edge(self.graph, self.strategy_set[int(i[j])], i, j))
-            self.profiles_with_payoffs[i] = payoff[:]
-            payoff.clear()
+                payoff_temp.append(self.traffic_edge(self.graph, self.strategy_set[int(i[j])], i, j))
+            self.payoff[i] = np.array(payoff_temp[:])
+            payoff_temp.clear()
 
-        print(self.profiles)
-        print(self.strategy_set)
-        print(self.profiles_with_payoffs)
+        # print(self.profiles)
+        # print(self.strategy_set)
+        # print(self.payoff)
    # Latency functions
 
     @staticmethod
