@@ -9,16 +9,22 @@ class Network:
         self.graph = graph
         assert "S" in graph.nodes(), "Graph needs to have a node labeled S"
         assert "T" in graph.nodes(), "Graph needs to have a node labeled T"
+
         # First enumerate all strategies available from the given graph
         self.strategy_set = []
         for i in nx.all_simple_paths(self.graph, "S", "T"):
             self.strategy_set.append(i)
         self.strategy_set.sort()
+
         # Then, create all possible profiles corresponding to the set of strategies
-        enumeration = []
-        for i, strategy in enumerate(self.strategy_set):
-            enumeration.append(i)
-        self.profiles = list(it.product(enumeration, repeat=number_of_players))
+        self.profiles = []
+        for i in it.product(range(number_of_players + 1), repeat = len(self.strategy_set)):
+            if sum(i) == number_of_players:
+                self.profiles.append(i)
+
+        #for i, strategy in enumerate(self.strategy_set):
+        #    enumeration.append(i)
+        #self.profiles = list(it.product(enumeration, repeat=number_of_players))
 
         # Then create the payoff function, which is a dictionary
         # where keys are profiles (tuples of int), and values
@@ -28,13 +34,16 @@ class Network:
         self.payoff = {}
         for i in self.profiles:
             for j in range(0,len(i)):
-                payoff_temp.append(self.traffic_edge(self.graph, self.strategy_set[int(i[j])], i, j))
+                if i[j] == 0:
+                    payoff_temp.append(0)
+                else:
+                    payoff_temp.append(self.traffic_edge(total_players = int(i[j]) ,profile = i, position = j))
             self.payoff[i] = np.array(payoff_temp[:])
             payoff_temp.clear()
 
         # print(self.profiles)
         # print(self.strategy_set)
-        print(self.payoff)
+        # print(self.payoff)
    # Latency functions
 
     @staticmethod
@@ -51,20 +60,19 @@ class Network:
 
     # End of latency functions
 
-    def traffic_edge(self, graph, strategy, profile, position):
+    def traffic_edge(self, total_players, profile, position):
 
         traffic = 0
         payoff = 0
+        strategy = self.strategy_set[position]
         for i in range(0, len(strategy)-1):
-            traffic += 1
+            traffic += profile[position]
             for j in range(0, len(profile)): # position of the index j in profile is the index whose traffic is to be determined
                 if j == position:
                     pass
-                elif profile[position] == profile[j]: #both have same profile
-                    traffic += 1
                 else:
-                    if self.search_for_edges(strategy[i], strategy[i+1], self.strategy_set[profile[j]]):
-                        traffic += 1
+                    if self.search_for_edges(strategy[i], strategy[i+1], self.strategy_set[j]):
+                        traffic += profile[j]
             payoff += self.graph.get_edge_data(strategy[i], strategy[i+1]).get("object")(traffic)
             traffic = 0
 
@@ -92,6 +100,13 @@ def create_braess_network():
         my_graph.add_edge("B", "T", object=Network.linear)
         return my_graph
 
+def create_simple_network():
+        my_graph = nx.Graph()
+        my_graph.add_edge("S", "T", object=Network.constant)
+        my_graph.add_edge("S", "A", object=Network.constant)
+        my_graph.add_edge("A", "T", object=Network.constant)
+        return my_graph
+
 
 # g = create_braess_network()
-# t1 = Network(g,3)
+# t1 = Network(g,2)
