@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
+import scipy as sp
+import network as network
 
 
 class MoranProcess:
-    def __init__(self, game_matrix, w, mutation_probability,
+    def __init__(self, number_of_players, w, mutation_probability,
                  population_array, seed = None):
 
         """
@@ -19,13 +21,11 @@ class MoranProcess:
         # temporarily we only accept populations of two types
         if seed is not None:
             np.random.seed(seed)
-        self.game_matrix = np.array(game_matrix)
-        assert self.game_matrix.shape[0] == self.game_matrix.shape[1], "Matrix should be square"
 
-        self.number_of_strategies = self.game_matrix.shape[0]
-        assert len(
-            population_array) == self.number_of_strategies, "Number of strategies does not agree with population array"
-
+        # calling Network class for graph creation and payoff dictionary
+        braess_graph = network.create_braess_network()
+        self.network_game = network.Network(braess_graph, number_of_players)
+        self.number_of_strategies = len(self.network_game.strategy_set)
         self.population = np.array(population_array, dtype=int)
         self.population_size = np.sum(self.population)
         assert self.population_size >= 2, "Population should be larger than 1"
@@ -34,14 +34,31 @@ class MoranProcess:
         assert 0 <= mutation_probability <= 1, "Mutation probability should be in [0, 1]"
         self.mutation_probability = mutation_probability
 
-
-
     def __compute_payoff(self):
         """
         A payoff is computed for each strategy and is normalised
         :return: payoff matrix
         """
-        return (np.dot(self.game_matrix, self.population) - np.diag(self.game_matrix)) / (self.population_size - 1)
+        partial_computed_payoff = 0
+        computed_payoff = []
+        for i in range(0, len(self.population)):
+            for key in self.network_game.payoff:
+                if key[i] >= 1:
+                    partial_computed_payoff += self.network_game.payoff[key][i] * self.__multivariate_hypergeometric(self.population, self.network_game.payoff[key])
+            computed_payoff.append(partial_computed_payoff)
+            partial_computed_payoff = 0
+
+        return np.array(computed_payoff)
+
+    def __multivariate_hypergeometric(self, pop, target):
+        N = sum(pop)
+        n = sum(target)
+        assert n <= N, "Give me something that makes sense!"
+        assert len(pop) == len(target), "Give me something that makes sense!"
+        product = 1.0
+        for K_i, k_i in zip(pop, target):
+            product = product*sp.misc.comb(K_i, k_i)
+        return product/sp.misc.comb(N, n)
 
     def __compute_fitness(self):
         """
@@ -102,7 +119,7 @@ class MoranProcess:
 
 def main():
     #pass
-    test = MoranProcess([[3, 0, 1, 2], [4, 1, 1, 7], [2, 5, 1, 9], [2, 3, 1, 2]], w=5, mutation_probability=0.001, population_array=[60, 30, 5, 5], seed = 123)
+    test = MoranProcess(number_of_players=2, w=5, mutation_probability=0.001, population_array=[2, 3, 5, 0], seed=123)
     df = test.run_time_series(1000, 10)
     df.to_csv("my_simulation.csv")
     print(df.head())
