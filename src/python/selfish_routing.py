@@ -5,7 +5,7 @@ import network as network
 
 
 class MoranProcess:
-    def __init__(self, number_of_players, w, mutation_probability,
+    def __init__(self, graph, number_of_players, w, mutation_probability,
                  population_array, seed = None):
 
         """
@@ -23,8 +23,8 @@ class MoranProcess:
             np.random.seed(seed)
 
         # calling Network class for graph creation and payoff dictionary
-        braess_graph = network.create_braess_network()
-        self.network_game = network.Network(braess_graph, number_of_players)
+        # braess_graph = network.create_braess_network()
+        self.network_game = network.Network(graph, number_of_players)
         self.number_of_strategies = len(self.network_game.strategy_set)
         self.population = np.array(population_array, dtype=int)
         self.population_size = np.sum(self.population)
@@ -44,11 +44,11 @@ class MoranProcess:
         for i in range(0, len(self.population)):
             for key in self.network_game.payoff:
                 if key[i] >= 1:
-                    partial_computed_payoff += self.network_game.payoff[key][i] * self.__multivariate_hypergeometric(self.population, self.network_game.payoff[key])
+                    partial_computed_payoff += self.network_game.payoff[key][i] * self.__multivariate_hypergeometric(self.population, key)
             computed_payoff.append(partial_computed_payoff)
             partial_computed_payoff = 0
 
-        return np.array(computed_payoff)
+        return (-1 * np.array(computed_payoff))
 
     def __multivariate_hypergeometric(self, pop, target):
         N = sum(pop)
@@ -111,18 +111,20 @@ class MoranProcess:
                 array_of_population.append(list(self.population))
                 array_of_time_steps.append(time_step)
         # uses the ASCII code to generate column vales
-        column_array = list(map(chr, range(97, 97+len(self.population))))
+        #list(map(chr, range(97, 97+len(self.population))))
+        column_array = self.network_game.strategy_names
         df = pd.DataFrame(data=array_of_population, columns=column_array, index=array_of_time_steps)
         df.index.names = ['Time Steps']
         return df
 
 
-def main():
+#def main():
     #pass
-    test = MoranProcess(number_of_players=2, w=5, mutation_probability=0.001, population_array=[2, 3, 5, 0], seed=123)
-    df = test.run_time_series(1000, 10)
-    df.to_csv("my_simulation.csv")
-    print(df.head())
+    #braess_graph = network.create_braess_network()
+    #test = MoranProcess(graph=braess_graph, number_of_players=10, w=5, mutation_probability=0.01, population_array=[20, 30, 50, 0], seed=123)
+    #df = test.run_time_series(1000, 100)
+    #df.to_csv("my_simulation.csv")
+    #print(df.mean())
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

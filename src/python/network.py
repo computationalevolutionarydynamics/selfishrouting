@@ -16,6 +16,10 @@ class Network:
             self.strategy_set.append(i)
         self.strategy_set.sort()
 
+        self.strategy_names = []
+        for i in self.strategy_set:
+            self.strategy_names.append("".join(i))
+
         # Then, create all possible profiles corresponding to the set of strategies
         self.profiles = []
         for i in it.product(range(number_of_players + 1), repeat = len(self.strategy_set)):
@@ -51,12 +55,16 @@ class Network:
         return x
 
     @staticmethod
-    def constant(x):
+    def zero_constant(x):
         return 0
 
     @staticmethod
     def quadratic(x):
         return x**2.0
+
+    @staticmethod
+    def twice_constant(x):
+        return 0.5
 
     # End of latency functions
 
@@ -93,11 +101,11 @@ class Network:
 
 def create_braess_network():
         my_graph = nx.Graph()
-        my_graph.add_edge("S", "A", object=Network.linear)
+        my_graph.add_edge("S", "A", object=Network.twice_constant)
         my_graph.add_edge("S", "B", object=Network.linear)
-        my_graph.add_edge("A", "B", object=Network.constant)
+        my_graph.add_edge("A", "B", object=Network.zero_constant)
         my_graph.add_edge("A", "T", object=Network.linear)
-        my_graph.add_edge("B", "T", object=Network.linear)
+        my_graph.add_edge("B", "T", object=Network.twice_constant)
         return my_graph
 
 def create_simple_network():
