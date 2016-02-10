@@ -36,7 +36,6 @@ class ReplicatorDynamics:
         soln = odeint(self.replicator_equation, y_0 , t_vector, args=(self.population_fraction,))
         orbits = [soln[:, i] for i in range(len(self.population_fraction))]
 
-        #plotting function here
         #Plotting stuff
         plt.rc('lines', linewidth=2.0)
         plt.figure(figsize=(20,4))
