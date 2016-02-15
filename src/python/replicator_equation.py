@@ -39,11 +39,38 @@ class ReplicatorDynamics:
         plt.legend()
 
 
+    def replicator_mutator_trajectory(self, t_vector, population_fraction, u,  **kwargs):
+        mutation_matrix = create_mutation_matrix(u, ???)
+        soln = odeint(replicator_mutator_equation, population_fraction, t_vector, args=(self.number_of_players, mutation_matrix))
+
+        orbits = [soln[:, i] for i in range(len(population_fraction))]
+
+        #Plotting stuff
+        plt.rc('lines', linewidth=2.0)
+        plt.figure(figsize=(20,4))
+        color=iter(cm.rainbow(np.linspace(0,1,len(orbits))))
+        for i in range(len(orbits)):
+            c=next(color)
+            plt.plot(orbits[i], c=c, label=self.network_game.strategy_names[i])
+        plt.rc('lines', linewidth=2.0)
+        plt.legend()
+
+
+
 def replicator_equation(x, t, number_of_players):
     G = network.create_braess_network()
     t = ReplicatorDynamics(G, number_of_players)
     fitness_vector = t.compute_payoff(x)
     average_fitness = np.dot(x, fitness_vector)
+    return x * (fitness_vector - average_fitness)
+
+
+def replicator_mutator_equation(x, t, number_of_players, mutation_matrix):
+    G = network.create_braess_network()
+    t = ReplicatorDynamics(G, number_of_players)
+    fitness_vector = t.compute_payoff(x)
+    average_fitness = np.dot(x, fitness_vector)
+    # dispell the sum here, so that mutation matrix can be included
     return x * (fitness_vector - average_fitness)
 
 
