@@ -64,7 +64,7 @@ class Network:
 
     @staticmethod
     def twice_constant(x):
-        return 10
+        return 11
 
     # End of latency functions
 
