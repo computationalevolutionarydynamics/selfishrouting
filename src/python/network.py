@@ -6,31 +6,34 @@ import numpy as np
 class Network:
 
     def __init__(self, graph, number_of_players):
+        """
+
+        :param graph: a networkx graph object (look at the end of this code for example networks)
+        :param number_of_players: any numeric integer greater than 1
+        :return:
+        """
         self.graph = graph
         assert "S" in graph.nodes(), "Graph needs to have a node labeled S"
         assert "T" in graph.nodes(), "Graph needs to have a node labeled T"
 
         # First enumerate all strategies available from the given graph
         self.strategy_set = []
-        for i in nx.all_simple_paths(self.graph, "S", "T"):
+        for i in nx.all_simple_paths(self.graph, "S", "T"): # use all simple paths function avaliable in networkx
             self.strategy_set.append(i)
-        self.strategy_set.sort()
+        self.strategy_set.sort()  # sorting is necessary to generate the test cases
 
+        # the array of strategy names are used when creating a diagrams
         self.strategy_names = []
         for i in self.strategy_set:
             self.strategy_names.append("".join(i))
 
-        # Then, create all possible profiles corresponding to the set of strategies
+        # create all possible profiles corresponding to the set of strategies
         self.profiles = []
         for i in it.product(range(number_of_players + 1), repeat = len(self.strategy_set)):
             if sum(i) == number_of_players:
                 self.profiles.append(i)
 
-        #for i, strategy in enumerate(self.strategy_set):
-        #    enumeration.append(i)
-        #self.profiles = list(it.product(enumeration, repeat=number_of_players))
-
-        # Then create the payoff function, which is a dictionary
+        # Finally create the payoff function, which is a dictionary
         # where keys are profiles (tuples of int), and values
         # are payoffs
 
@@ -45,9 +48,6 @@ class Network:
             self.payoff[i] = np.array(payoff_temp[:])
             payoff_temp.clear()
 
-        # print(self.profiles)
-        # print(self.strategy_set)
-        # print(self.payoff)
    # Latency functions
 
     @staticmethod
@@ -69,7 +69,14 @@ class Network:
     # End of latency functions
 
     def traffic_edge(self, total_players, profile, position):
+        """
+        calculates the traffic and hence the payoff for a player with certain position in a profile
 
+        :param total_players: total number of players playing the game
+        :param profile:  an array indicating which player is using which strategy e.g [1,0,2,1]
+        :param position: position of the player in the profile whose payoff is to be calculated
+        :return: payoff for the player indicated by position
+        """
         traffic = 0
         payoff = 0
         strategy = self.strategy_set[position]
@@ -87,33 +94,46 @@ class Network:
         return payoff
 
     def search_for_edges(self, node1, node2, strategy):
-        # print(strategy)
-        # print(node1)
-        # print(node2)
+        """
+        looks for whether the two edges and thus the path exists in a strategy
+        :param node1: node name
+        :param node2: node name
+        :param strategy: the strategy in which to search
+        :return: the boolean value that indicates whether the path exists in the strategy
+        """
         x = False
         if node1 in strategy:
             if node2 == strategy[strategy.index(node1) + 1]:
                 x = True
-        # print(x)
         return x
 
 
-
 def create_braess_network():
-        my_graph = nx.Graph()
-        my_graph.add_edge("S", "A", object=Network.twice_constant)
-        my_graph.add_edge("S", "B", object=Network.linear)
-        my_graph.add_edge("A", "B", object=Network.zero_constant)
-        my_graph.add_edge("A", "T", object=Network.linear)
-        my_graph.add_edge("B", "T", object=Network.twice_constant)
-        return my_graph
+    """"
+    creates braess network using networkx library
+    :return: braess network
+    """
+
+    my_graph = nx.Graph()
+    my_graph.add_edge("S", "A", object=Network.twice_constant)
+    my_graph.add_edge("S", "B", object=Network.linear)
+    my_graph.add_edge("A", "B", object=Network.zero_constant)
+    my_graph.add_edge("A", "T", object=Network.linear)
+    my_graph.add_edge("B", "T", object=Network.twice_constant)
+    return my_graph
+
 
 def create_simple_network():
-        my_graph = nx.Graph()
-        my_graph.add_edge("S", "T", object=Network.constant)
-        my_graph.add_edge("S", "A", object=Network.constant)
-        my_graph.add_edge("A", "T", object=Network.constant)
-        return my_graph
+
+    """
+    creates a simple graph of three nodes
+    :return: simple graph
+    """
+    my_graph = nx.Graph()
+    my_graph.add_edge("S", "T", object=Network.constant)
+    my_graph.add_edge("S", "A", object=Network.constant)
+    my_graph.add_edge("A", "T", object=Network.constant)
+    return my_graph
 
 
 # g = create_braess_network()
