@@ -105,7 +105,7 @@ def replicator_mutator_equation(x, t, number_of_players, mutation_matrix):
     return np.array(c, dtype=float)
 
 
-#G = network.create_braess_network()
+ #G = network.create_braess_network()
 #t_vector = np.linspace(0, 10, 10000)
 #pop = [0.1, 0.4, 0.2, 0.3]
 #t = ReplicatorDynamics(G, 5)
