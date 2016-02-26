@@ -135,6 +135,5 @@ def create_simple_network():
     my_graph.add_edge("A", "T", object=Network.constant)
     return my_graph
 
-
 # g = create_braess_network()
 # t1 = Network(g,2)
