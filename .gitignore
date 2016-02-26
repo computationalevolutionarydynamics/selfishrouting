@@ -3,6 +3,7 @@
 
 #!! ERROR: ytho is undefined. Use list command to see defined gitignore types !!#
 
+*.csv
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

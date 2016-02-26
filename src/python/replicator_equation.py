@@ -33,6 +33,7 @@ class ReplicatorDynamics:
     def create_mutation_matrix(u, number_of_strategies):
         """
         creates an NxN mutation matrix whose every row adds up to one
+        
         :param u: mutation probablity
         :param number_of_strategies: number of strategies in the game
         :return: an NxN mutation matrix
